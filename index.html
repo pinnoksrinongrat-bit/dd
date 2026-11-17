@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#512c43">
+  <title>FixFlow — ศูนย์จัดการงานซ่อม</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');
+    :root {
+      --navy:#512c43; --navy2:#653950; --ink:#382b37; --muted:#91818d;
+      --paper:#fff7fa; --white:#fff; --line:#f1e4eb; --teal:#d94f91;
+      --mint:#fbe2ee; --orange:#f1a64a; --red:#dc6a69; --blue:#628dcc;
+      --shadow:0 12px 32px rgba(102,45,75,.07); --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 "DM Sans","IBM Plex Sans Thai",sans-serif}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:254px;padding:27px 18px;background:var(--navy);color:#fff;display:flex;flex-direction:column;z-index:5}
+    .brand{display:flex;align-items:center;gap:12px;padding:4px 10px 32px}
+    .brand-icon{height:42px;width:42px;border-radius:14px;background:#cf4687;display:grid;place-items:center;font-size:23px;box-shadow:0 5px 16px #34182a}
+    .brand-name{font-size:18px;font-weight:800;letter-spacing:-.4px}.brand-name small{display:block;color:#d4b8c8;font-size:10px;font-weight:500;letter-spacing:1.5px}
+    .nav-label{margin:5px 11px 10px;color:#c5a6b8;font-size:10px;font-weight:700;letter-spacing:1.5px}
+    .nav{display:grid;gap:6px}
+    .nav-btn{width:100%;display:flex;align-items:center;gap:12px;border:0;border-radius:11px;padding:11px 13px;color:#ead8e2;background:transparent;text-align:left;transition:.18s}
+    .nav-btn .nav-icon{width:22px;text-align:center;font-size:17px}
+    .nav-btn:hover{color:white;background:#633950}.nav-btn.active{background:#713e5b;color:white;box-shadow:inset 3px 0 #ff8fbe}
+    .nav-btn.active .nav-icon{color:#ff9bc5}
+    .side-bottom{margin-top:auto}
+    .source-card{border:1px solid #75455f;background:#5c334b;border-radius:14px;padding:14px;color:#f5e8ef}
+    .source-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+    .live-dot{height:7px;width:7px;border-radius:50%;background:#7cdbad;box-shadow:0 0 0 4px #7cdbad1c}
+    .source-card p{color:#d5b9c9;font-size:11px;margin:9px 0 0;line-height:1.65}
+    .profile{display:flex;align-items:center;gap:10px;padding:18px 5px 0}
+    .avatar{width:35px;height:35px;border-radius:12px;background:#f0bb73;color:#47351d;display:grid;place-items:center;font-size:15px;font-weight:700}
+    .profile strong{font-size:12px;display:block}.profile small{font-size:10px;color:#d5b9c9}
+    .main{margin-left:254px;min-height:100vh;padding:30px 38px 55px;max-width:1700px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:27px;gap:15px}
+    .breadcrumb{font-size:12px;color:var(--muted)}.breadcrumb strong{color:#67485a}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .date-chip,.icon-btn{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 12px;color:#536975;font-size:12px}
+    .icon-btn{font-size:16px;line-height:1}
+    .page{display:none;animation:fade .2s ease}.page.active{display:block}
+    @keyframes fade{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}
+    .welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}
+    h1{font-size:27px;letter-spacing:-.7px;line-height:1.25;margin:0 0 6px;font-weight:700}
+    .subtitle{font-size:13px;color:var(--muted);margin:0}
+    .primary-btn{border:0;border-radius:11px;background:var(--teal);color:white;padding:11px 15px;font-weight:600;box-shadow:0 7px 16px #d94f9129;transition:.2s}
+    .primary-btn:hover{background:#bf3679;transform:translateY(-1px)}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:19px}
+    .card,.panel{background:var(--white);border:1px solid #eaf0f2;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .stat-card{padding:17px 18px;position:relative;overflow:hidden}
+    .stat-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;font-weight:500}
+    .stat-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;font-size:16px}
+    .stat-value{margin:11px 0 3px;font-size:26px;font-weight:700;letter-spacing:-.8px;line-height:1.2}
+    .stat-foot{font-size:11px;color:var(--muted)}.stat-foot strong{color:var(--teal)}
+    .icon-teal{background:#fbe4ef;color:#c0447e}.icon-amber{background:#fff1df;color:#d18b2d}.icon-blue{background:#e9f1fb;color:#628dcc}.icon-violet{background:#f0ebfb;color:#8b76c4}
+    .overview-grid{display:grid;grid-template-columns:minmax(0,1.52fr) minmax(270px,.88fr);gap:17px;margin-bottom:18px}
+    .panel{padding:19px 20px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+    .panel-head h2{font-size:14px;margin:0;font-weight:700}
+    .panel-head p{font-size:11px;color:var(--muted);margin:3px 0 0}
+    .text-link{border:0;background:transparent;color:#c1427f;font-size:11px;font-weight:600;padding:5px}
+    .chart-legend{display:flex;align-items:center;gap:14px;font-size:10px;color:var(--muted)}
+    .legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+    .chart{height:172px;display:flex;align-items:flex-end;gap:11px;padding:0 8px 0 26px;position:relative;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,#f0f3f5 43px)}
+    .chart:before{content:"";position:absolute;left:0;top:3px;bottom:0;width:22px;background:repeating-linear-gradient(to bottom,#91a0a8 0 1px,transparent 1px 42px);opacity:.2}
+    .chart-col{flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:4px;position:relative}
+    .chart-bar{width:min(19px,34%);border-radius:5px 5px 1px 1px;min-height:3px;transition:height .3s}
+    .chart-bar.primary{background:#d94f91}.chart-bar.secondary{background:#f5d6e5}
+    .chart-label{position:absolute;bottom:-23px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#8998a0;font-size:10px}
+    .chart-wrap{padding-bottom:23px}
+    .status-list{display:grid;gap:14px}
+    .status-row{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:9px;font-size:12px}
+    .status-dot{height:8px;width:8px;border-radius:50%}
+    .status-row span:nth-child(2){color:#566d78}.status-row strong{font-size:12px}
+    .progress{height:5px;border-radius:9px;background:#eff3f4;grid-column:2/4;margin-top:-6px;overflow:hidden}
+    .progress i{display:block;height:100%;border-radius:9px}
+    .table-panel{padding:18px 19px}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;white-space:nowrap}
+    th{text-align:left;color:#87959d;font-size:10px;font-weight:600;padding:10px 9px;border-bottom:1px solid var(--line)}
+    td{padding:11px 9px;border-bottom:1px solid #f0f3f4;font-size:11px;color:#425965}
+    tbody tr:last-child td{border-bottom:0}tbody tr{cursor:pointer;transition:background .15s}tbody tr:hover{background:#f8fbfb}
+    .request-code{font-weight:700;color:#274651}.equipment-cell{display:flex;align-items:center;gap:8px}
+    .device-icon{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#eef5f3;font-size:13px}
+    .badge{display:inline-flex;align-items:center;border-radius:20px;padding:4px 8px;font-size:10px;font-weight:600}
+    .badge.done{background:#e7f6ed;color:#348052}.badge.progressing{background:#eaf1fc;color:#557bb5}.badge.waiting{background:#fff3df;color:#bd8125}.badge.urgent{background:#fde9e8;color:#c65353}.badge.normal{background:#eef1f3;color:#697b84}.badge.high{background:#fff1df;color:#ba7b22}
+    .filters{padding:14px 15px;margin-bottom:15px;display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+    .filter-field{display:grid;gap:5px;min-width:132px;flex:1}
+    .filter-field label{font-size:10px;color:#778992;font-weight:600}
+    .filter-field input,.filter-field select,.searchbox{height:36px;border:1px solid #e3eaed;background:white;border-radius:9px;padding:0 10px;color:#415963;font-size:11px;outline:none}
+    .filter-field input:focus,.filter-field select:focus,.searchbox:focus{border-color:#e48ab4;box-shadow:0 0 0 3px #d94f9112}
+    .search-field{min-width:210px;flex:1.5}.reset-btn,.export-btn{height:36px;padding:0 12px;border-radius:9px;background:white;border:1px solid #e3eaed;color:#516872;font-size:11px}
+    .reset-btn:hover,.export-btn:hover{border-color:#e6a3c2;color:#c1427f}
+    .result-label{font-size:11px;color:var(--muted)}.result-label strong{color:var(--ink)}
+    .table-titlebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:1px 0 10px}
+    .table-titlebar strong{font-size:12px}.table-titlebar span{font-size:11px;color:var(--muted)}
+    .details-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .detail-card{padding:16px}.detail-card h3{margin:0 0 6px;font-size:12px}.detail-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.7}
+    .insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .bar-list{display:grid;gap:14px}
+    .bar-row{display:grid;grid-template-columns:minmax(95px,145px) 1fr 28px;align-items:center;gap:10px;font-size:11px}
+    .bar-track{height:9px;background:#f6edf1;border-radius:8px;overflow:hidden}.bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#cf4687,#f18db8)}
+    .bar-count{color:#435b65;text-align:right;font-weight:700}
+    .metric-list{display:grid;gap:0}.metric-item{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #eff2f3;font-size:11px;color:#627680}.metric-item:last-child{border:0}.metric-item strong{color:#263f4b;font-size:12px}
+    .empty-state{text-align:center;padding:35px 12px;color:var(--muted);font-size:12px}
+    .mobile-menu{display:none}
+    .modal-backdrop{position:fixed;inset:0;background:#0b1c25a8;display:none;place-items:center;padding:18px;z-index:10}
+    .modal-backdrop.open{display:grid}
+    .modal{width:min(570px,100%);max-height:90vh;overflow:auto;background:white;border-radius:20px;box-shadow:0 30px 90px #07151e55;padding:22px}
+    .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:17px}
+    .modal-head h2{font-size:17px;margin:0}.modal-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+    .close-btn{border:0;background:#f1f5f6;width:30px;height:30px;border-radius:9px;color:#52666e;font-size:17px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-field{display:grid;gap:5px}.form-field.full{grid-column:1/-1}
+    .form-field label{font-size:10px;color:#6b7e86;font-weight:600}
+    .form-field input,.form-field select{border:1px solid var(--line);height:38px;border-radius:9px;padding:0 10px;font-size:12px;color:#314a56;outline:none}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+    .secondary-btn{border:1px solid var(--line);border-radius:9px;background:white;color:#576c75;padding:9px 13px;font-size:11px}
+    .detail-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+    .detail-pair{padding:10px 0;border-bottom:1px solid #eff2f3}.detail-pair span{display:block;color:var(--muted);font-size:10px}.detail-pair strong{font-size:12px}
+    .toast{position:fixed;right:25px;bottom:24px;padding:12px 16px;border-radius:11px;background:var(--navy);color:white;font-size:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:20}
+    .toast.show{opacity:1;transform:none}
+    @media(max-width:1100px){.main{padding:25px 24px}.sidebar{width:224px}.main{margin-left:224px}.cards{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:780px){.sidebar{width:72px;padding:20px 10px}.brand{padding:4px 5px 28px}.brand-name,.nav-label,.nav-btn .nav-text,.source-card,.profile>div:not(.avatar){display:none}.brand-icon{width:42px}.nav-btn{justify-content:center;padding:12px 4px}.nav-btn .nav-icon{font-size:19px}.profile{justify-content:center}.main{margin-left:72px;padding:22px 18px 40px}.overview-grid{grid-template-columns:1fr}.details-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:540px){.main{padding:18px 12px 34px}.topbar{margin-bottom:20px}.date-chip{display:none}.welcome{align-items:flex-start}.welcome h1{font-size:22px}.welcome .primary-btn{font-size:0;padding:10px 12px}.welcome .primary-btn:after{content:"+";font-size:18px}.cards{gap:9px}.stat-card{padding:13px}.stat-value{font-size:22px}.stat-top{font-size:10px}.stat-icon{width:29px;height:29px}.panel{padding:15px}.filters{display:grid;grid-template-columns:1fr 1fr}.search-field{min-width:0;grid-column:1/-1}.filter-field{min-width:0}.details-grid,.insight-grid{grid-template-columns:1fr}.table-panel{padding:14px 11px}.table-titlebar span{font-size:10px}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.detail-modal-grid{grid-template-columns:1fr 1fr}th,td{padding:10px 7px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">🔧</div><div class="brand-name">FixFlow<small>MAINTENANCE HUB</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav class="nav" aria-label="เมนูหลัก">
+      <button class="nav-btn active" data-page="overview"><span class="nav-icon">◫</span><span class="nav-text">ภาพรวม</span></button>
+      <button class="nav-btn" data-page="requests"><span class="nav-icon">▤</span><span class="nav-text">รายการแจ้งซ่อม</span></button>
+      <button class="nav-btn" data-page="analytics"><span class="nav-icon">▥</span><span class="nav-text">วิเคราะห์ข้อมูล</span></button>
+      <button class="nav-btn" data-page="guide"><span class="nav-icon">ⓘ</span><span class="nav-text">รายละเอียดข้อมูล</span></button>
+    </nav>
+    <div class="side-bottom">
+      <div class="source-card"><div class="source-head"><i class="live-dot"></i>พร้อมใช้งาน</div><p>แสดงรายการที่ได้รับมา 10 งาน<br>ข้อมูลต้นฉบับล่าสุด 6 พ.ย. 2026</p></div>
+      <div class="profile"><div class="avatar">F</div><div><strong>ผู้ดูแลระบบ</strong><small>Maintenance team</small></div></div>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="breadcrumb">FixFlow <span> / </span> <strong id="crumb">ภาพรวม</strong></div><div class="top-actions"><span class="date-chip">◷ &nbsp;ช่วงข้อมูล 8 ก.ย. – 6 พ.ย. 2026</span><button class="export-btn" id="shareApp">↗ &nbsp;แชร์ลิงก์</button><button class="icon-btn" id="topAdd" aria-label="แจ้งซ่อมใหม่">＋</button></div></header>
+
+    <section class="page active" id="page-overview">
+      <div class="welcome"><div><h1>สวัสดี, ทีมซ่อมบำรุง 👋</h1><p class="subtitle">ภาพรวมงานแจ้งซ่อมและค่าใช้จ่ายจากข้อมูลที่มี</p></div><button class="primary-btn add-open">＋ &nbsp;แจ้งซ่อมใหม่</button></div>
+      <div class="cards" id="overviewCards"></div>
+      <div class="overview-grid">
+        <section class="panel"><div class="panel-head"><div><h2>แนวโน้มงานซ่อมรายเดือน</h2><p>จำนวนงานที่แจ้งและงานที่ซ่อมเสร็จ</p></div><div class="chart-legend"><span><i class="legend-dot" style="background:#d94f91"></i>แจ้งซ่อม</span><span><i class="legend-dot" style="background:#f5d6e5"></i>ซ่อมเสร็จ</span></div></div><div class="chart-wrap"><div class="chart" id="monthlyChart"></div></div></section>
+        <section class="panel"><div class="panel-head"><div><h2>สถานะงานซ่อม</h2><p>สัดส่วนจากทั้งหมด <span id="statusTotal"></span> รายการ</p></div></div><div class="status-list" id="statusList"></div></section>
+      </div>
+      <section class="panel table-panel"><div class="panel-head"><div><h2>รายการแจ้งซ่อมล่าสุด</h2><p>คลิกที่รายการเพื่อดูรายละเอียดเพิ่มเติม</p></div><button class="text-link" data-goto="requests">ดูรายการทั้งหมด →</button></div><div class="table-wrap"><table><thead><tr><th>รหัสงาน</th><th>อุปกรณ์</th><th>อาการเสีย</th><th>แผนก</th><th>วันที่แจ้ง</th><th>สถานะ</th><th>ค่าใช้จ่ายรวม</th></tr></thead><tbody id="recentRows"></tbody></table></div></section>
+    </section>
+
+    <section class="page" id="page-requests">
+      <div class="welcome"><div><h1>รายการแจ้งซ่อม</h1><p class="subtitle">ค้นหา กรอง และตรวจสอบรายละเอียดงานซ่อมทั้งหมด</p></div><button class="primary-btn add-open">＋ &nbsp;แจ้งซ่อมใหม่</button></div>
+      <div class="cards" id="requestCards"></div>
+      <section class="panel filters" aria-label="ตัวกรองรายการแจ้งซ่อม">
+        <div class="filter-field search-field"><label for="q">ค้นหาทุกข้อมูล</label><input class="searchbox" id="q" placeholder="รหัสงาน อาการ อุปกรณ์ หรือแผนก…"></div>
+        <div class="filter-field"><label for="departmentFilter">แผนก</label><select id="departmentFilter"><option value="">ทุกแผนก</option></select></div>
+        <div class="filter-field"><label for="equipmentFilter">ประเภทอุปกรณ์</label><select id="equipmentFilter"><option value="">ทุกอุปกรณ์</option></select></div>
+        <div class="filter-field"><label for="statusFilter">สถานะงาน</label><select id="statusFilter"><option value="">ทุกสถานะ</option></select></div>
+        <div class="filter-field"><label for="priorityFilter">ความเร่งด่วน</label><select id="priorityFilter"><option value="">ทุกระดับ</option></select></div>
+        <div class="filter-field"><label for="fromDate">ตั้งแต่วันที่</label><input id="fromDate" type="date"></div>
+        <div class="filter-field"><label for="toDate">ถึงวันที่</label><input id="toDate" type="date"></div>
+        <button class="reset-btn" id="resetFilters">ล้างตัวกรอง</button>
+      </section>
+      <div class="table-titlebar"><strong>งานซ่อมทั้งหมด</strong><span class="result-label" id="resultCount"></span><button class="export-btn" id="exportCsv">↓ &nbsp;ส่งออก CSV</button></div>
+      <section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>รหัสงาน</th><th>วันที่แจ้ง</th><th>แผนก</th><th>อุปกรณ์</th><th>อาการเสีย</th><th>ความเร่งด่วน</th><th>สถานะงาน</th><th>เวลาซ่อม</th><th>ค่าใช้จ่ายรวม</th><th>พึงพอใจ</th></tr></thead><tbody id="requestRows"></tbody></table></div></section>
+    </section>
+
+    <section class="page" id="page-analytics">
+      <div class="welcome"><div><h1>วิเคราะห์ข้อมูล</h1><p class="subtitle">ข้อมูลเชิงลึกจากรายการแจ้งซ่อมที่ได้รับ โดยไม่เติมค่าที่ไม่มีในต้นฉบับ</p></div></div>
+      <div class="cards" id="analyticsCards"></div>
+      <div class="insight-grid">
+        <section class="panel"><div class="panel-head"><div><h2>งานซ่อมแยกตามแผนก</h2><p>เปรียบเทียบจำนวนรายการ</p></div></div><div class="bar-list" id="departmentBars"></div></section>
+        <section class="panel"><div class="panel-head"><div><h2>งานซ่อมแยกตามอุปกรณ์</h2><p>เปรียบเทียบจำนวนรายการ</p></div></div><div class="bar-list" id="equipmentBars"></div></section>
+        <section class="panel"><div class="panel-head"><div><h2>งานซ่อมแยกตามความเร่งด่วน</h2><p>จำนวนรายการในแต่ละระดับ</p></div></div><div class="bar-list" id="priorityBars"></div></section>
+        <section class="panel"><div class="panel-head"><div><h2>สรุปค่าใช้จ่ายและคุณภาพ</h2><p>คำนวณจากงานที่มีตัวเลขครบถ้วน</p></div></div><div class="metric-list" id="qualityMetrics"></div></section>
+      </div>
+    </section>
+
+    <section class="page" id="page-guide">
+      <div class="welcome"><div><h1>รายละเอียดข้อมูล</h1><p class="subtitle">ที่มา นิยาม และข้อควรทราบเกี่ยวกับข้อมูลบนแดชบอร์ด</p></div></div>
+      <div class="details-grid">
+        <article class="panel detail-card"><h3>🗂️ ข้อมูลที่ได้รับ</h3><p>รายการแจ้งซ่อมรหัส R001–R010 รวม 10 รายการ ครอบคลุมวันที่ 8 กันยายน – 6 พฤศจิกายน 2026</p></article>
+        <article class="panel detail-card"><h3>🧮 ค่าใช้จ่ายรวม</h3><p>คำนวณจากค่าอะไหล่ + ค่าแรง เฉพาะแถวที่มีตัวเลขทั้งสองช่อง ค่าใช้จ่ายยังไม่รวมรายการที่ข้อมูลไม่ครบ</p></article>
+        <article class="panel detail-card"><h3>⏱️ เวลาซ่อม</h3><p>ใช้ค่าชั่วโมงตามต้นฉบับ ไม่มีการประมาณเวลาสำหรับงานที่กำลังซ่อมหรือรออะไหล่</p></article>
+        <article class="panel detail-card"><h3>⭐ ความพึงพอใจ</h3><p>แสดงคะแนน 1–5 เฉพาะรายการที่ระบุคะแนน และคำนวณค่าเฉลี่ยจากรายการที่มีข้อมูลเท่านั้น</p></article>
+        <article class="panel detail-card"><h3>🔒 ข้อมูลที่ไม่ได้ระบุ</h3><p>ค่าใช้จ่าย เวลา และคะแนนที่ว่างในต้นฉบับจะแสดงเป็น “ไม่มีข้อมูล” และไม่นำไปคำนวณ</p></article>
+        <article class="panel detail-card"><h3>➕ รายการใหม่</h3><p>รายการที่เพิ่มผ่านหน้าเว็บนี้จัดเก็บไว้ในเบราว์เซอร์เครื่องนี้ (local storage) ยังไม่ได้ส่งไปยังระบบส่วนกลาง</p></article>
+        <article class="panel detail-card"><h3>⚠️ ขอบเขตข้อมูลต้นฉบับ</h3><p>ต้นฉบับที่ได้รับมาสิ้นสุดระหว่างรายการ R011 จึงไม่นำ R011 หรือรายการถัดไปมาสร้างข้อมูลโดยคาดเดา</p></article>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal"><div class="modal-head"><div><h2 id="modalTitle">แจ้งซ่อมรายการใหม่</h2><p>กรอกข้อมูลเท่าที่มี รายละเอียดเพิ่มเติมสามารถเว้นว่างได้</p></div><button class="close-btn" id="closeModal" aria-label="ปิด">×</button></div>
+    <form id="requestForm"><div class="form-grid">
+      <div class="form-field"><label for="newDate">วันที่แจ้ง *</label><input id="newDate" name="date" type="date" required></div>
+      <div class="form-field"><label for="newDepartment">แผนก *</label><input id="newDepartment" name="department" required placeholder="เช่น สำนักงาน"></div>
+      <div class="form-field"><label for="newEquipment">ประเภทอุปกรณ์ *</label><input id="newEquipment" name="equipment" required placeholder="เช่น คอมพิวเตอร์ตั้งโต๊ะ"></div>
+      <div class="form-field"><label for="newSymptom">อาการเสีย *</label><input id="newSymptom" name="symptom" required placeholder="อธิบายอาการ"></div>
+      <div class="form-field"><label for="newPriority">ความเร่งด่วน</label><select id="newPriority" name="priority"><option>ปกติ</option><option>เร่งด่วน</option><option>เร่งด่วนมาก</option></select></div>
+      <div class="form-field"><label for="newStatus">สถานะงาน</label><select id="newStatus" name="status"><option>รอซ่อม</option><option>กำลังซ่อม</option><option>รออะไหล่</option><option>ซ่อมเสร็จ</option></select></div>
+    </div><div class="modal-actions"><button type="button" class="secondary-btn" id="cancelModal">ยกเลิก</button><button class="primary-btn" type="submit">บันทึกรายการ</button></div></form>
+  </div>
+</div>
+<div class="modal-backdrop" id="detailBackdrop" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><div class="modal"><div class="modal-head"><div><h2 id="detailTitle">รายละเอียดงานซ่อม</h2><p>ข้อมูลจากรายการที่เลือก</p></div><button class="close-btn detail-close" aria-label="ปิด">×</button></div><div class="detail-modal-grid" id="detailContent"></div></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+  const originalRows = [
+    {id:"R001",date:"2026-10-26",department:"บัญชี",equipment:"โปรเจกเตอร์",symptom:"ภาพไม่ขึ้น",priority:"เร่งด่วนมาก",status:"ซ่อมเสร็จ",hours:3.9,parts:0,labor:585,satisfaction:2},
+    {id:"R002",date:"2026-10-03",department:"บัญชี",equipment:"โน้ตบุ๊ก",symptom:"แบตเตอรี่เสื่อม",priority:"เร่งด่วน",status:"ซ่อมเสร็จ",hours:4.8,parts:900,labor:720,satisfaction:4},
+    {id:"R003",date:"2026-09-17",department:"ช่างไฟฟ้า",equipment:"เครื่องพิมพ์",symptom:"พิมพ์ไม่ชัด",priority:"เร่งด่วน",status:"รออะไหล่"},
+    {id:"R004",date:"2026-10-08",department:"สำนักงาน",equipment:"เครื่องพิมพ์",symptom:"กระดาษติด",priority:"ปกติ",status:"ซ่อมเสร็จ",hours:5.7,parts:1500,labor:855,satisfaction:5},
+    {id:"R005",date:"2026-09-30",department:"บัญชี",equipment:"โน้ตบุ๊ก",symptom:"แบตเตอรี่เสื่อม",priority:"เร่งด่วน",status:"ซ่อมเสร็จ",hours:2.7,parts:2200,labor:405,satisfaction:5},
+    {id:"R006",date:"2026-09-08",department:"เทคโนโลยีสารสนเทศ",equipment:"คอมพิวเตอร์ตั้งโต๊ะ",symptom:"เปิดไม่ติด",priority:"เร่งด่วน",status:"ซ่อมเสร็จ",hours:1,parts:250,labor:150,satisfaction:3},
+    {id:"R007",date:"2026-10-10",department:"เทคโนโลยีสารสนเทศ",equipment:"โน้ตบุ๊ก",symptom:"แบตเตอรี่เสื่อม",priority:"ปกติ",status:"กำลังซ่อม"},
+    {id:"R008",date:"2026-10-15",department:"ช่างไฟฟ้า",equipment:"อุปกรณ์เครือข่าย",symptom:"สัญญาณหลุด",priority:"ปกติ",status:"ซ่อมเสร็จ",hours:3.3,parts:0,labor:495,satisfaction:2},
+    {id:"R009",date:"2026-11-06",department:"ช่างไฟฟ้า",equipment:"เครื่องพิมพ์",symptom:"เชื่อมต่อไม่ได้",priority:"เร่งด่วนมาก",status:"ซ่อมเสร็จ",hours:1.7,parts:250,labor:255,satisfaction:4},
+    {id:"R010",date:"2026-10-29",department:"ช่างไฟฟ้า",equipment:"อุปกรณ์เครือข่าย",symptom:"เปิดไม่ติด",priority:"ปกติ",status:"รออะไหล่"}
+  ];
+  const storageKey="fixflow-repair-records-v1";
+  let customRows=[];
+  try { const saved=JSON.parse(localStorage.getItem(storageKey)||"[]"); if(Array.isArray(saved)) customRows=saved; }
+  catch(error) { console.warn("Unable to load saved repair records.",error); }
+  let rows=[...originalRows,...customRows];
+  const statusColors={"ซ่อมเสร็จ":"#52b788","กำลังซ่อม":"#628dcc","รออะไหล่":"#f1a64a","รอซ่อม":"#aa94d1"};
+  const deviceIcons={"โปรเจกเตอร์":"📽️","โน้ตบุ๊ก":"💻","เครื่องพิมพ์":"🖨️","คอมพิวเตอร์ตั้งโต๊ะ":"🖥️","อุปกรณ์เครือข่าย":"📡"};
+  const nf=new Intl.NumberFormat("th-TH");
+  const money=n=>Number.isFinite(n)?nf.format(n)+" ฿":"ไม่มีข้อมูล";
+  const missing=value=>value===undefined||value===null||value===""?"ไม่มีข้อมูล":value;
+  const formatDate=value=>{if(!value)return "ไม่มีข้อมูล";const [y,m,d]=value.split("-");return `${d}/${m}/${y}`;};
+  const totalCost=row=>Number.isFinite(row.parts)&&Number.isFinite(row.labor)?row.parts+row.labor:null;
+  const sumKnown=(items,key)=>items.reduce((sum,row)=>sum+(Number.isFinite(row[key])?row[key]:0),0);
+  const averageKnown=(items,key)=>{const vals=items.map(x=>x[key]).filter(Number.isFinite);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;};
+  const completedCount=items=>items.filter(x=>x.status==="ซ่อมเสร็จ").length;
+  const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  const statusClass=status=>status==="ซ่อมเสร็จ"?"done":status==="กำลังซ่อม"?"progressing":status==="รออะไหล่"?"waiting":"progressing";
+  const priorityClass=priority=>priority==="เร่งด่วนมาก"?"urgent":priority==="เร่งด่วน"?"high":"normal";
+  function badge(status,priority=false){return `<span class="badge ${priority?priorityClass(status):statusClass(status)}">${escapeHtml(status)}</span>`;}
+  function cardsFor(items,target){
+    const avg=averageKnown(items,"satisfaction");
+    const cards=[
+      ["รายการทั้งหมด",nf.format(items.length),"ข้อมูลตามตัวกรอง","▤","icon-teal"],
+      ["ซ่อมเสร็จแล้ว",nf.format(completedCount(items)),items.length?`${Math.round(completedCount(items)/items.length*100)}% ของรายการ`:"ไม่มีรายการ","✓","icon-amber"],
+      ["ค่าใช้จ่ายที่ทราบ",money(sumKnown(items.filter(x=>totalCost(x)!==null),"parts")+sumKnown(items.filter(x=>totalCost(x)!==null),"labor")),"รวมจากรายการที่มีข้อมูลครบ","฿","icon-blue"],
+      ["คะแนนพึงพอใจเฉลี่ย",avg===null?"–":avg.toFixed(1)+" / 5",items.filter(x=>Number.isFinite(x.satisfaction)).length+" รายการที่มีคะแนน","☆","icon-violet"]
+    ];
+    document.getElementById(target).innerHTML=cards.map(c=>`<article class="card stat-card"><div class="stat-top"><span>${c[0]}</span><span class="stat-icon ${c[4]}">${c[3]}</span></div><div class="stat-value">${c[1]}</div><div class="stat-foot">${c[2]}</div></article>`).join("");
+  }
+  function rowHtml(row,full=false){
+    const common=`<tr data-row="${escapeHtml(row.id)}"><td class="request-code">${escapeHtml(row.id)}</td>`;
+    if(full)return common+`<td>${formatDate(row.date)}</td><td>${escapeHtml(row.department)}</td><td><span class="equipment-cell"><i class="device-icon">${deviceIcons[row.equipment]||"🧰"}</i>${escapeHtml(row.equipment)}</span></td><td>${escapeHtml(row.symptom)}</td><td>${badge(row.priority,true)}</td><td>${badge(row.status)}</td><td>${Number.isFinite(row.hours)?row.hours.toFixed(1)+" ชม.":"ไม่มีข้อมูล"}</td><td>${money(totalCost(row))}</td><td>${Number.isFinite(row.satisfaction)?row.satisfaction+" / 5":"ไม่มีข้อมูล"}</td></tr>`;
+    return common+`<td><span class="equipment-cell"><i class="device-icon">${deviceIcons[row.equipment]||"🧰"}</i>${escapeHtml(row.equipment)}</span></td><td>${escapeHtml(row.symptom)}</td><td>${escapeHtml(row.department)}</td><td>${formatDate(row.date)}</td><td>${badge(row.status)}</td><td>${money(totalCost(row))}</td></tr>`;
+  }
+  function drawChart(){
+    const months=["2026-09","2026-10","2026-11"],labels=["ก.ย.","ต.ค.","พ.ย."],max=Math.max(1,...months.map(m=>rows.filter(r=>r.date.startsWith(m)).length));
+    document.getElementById("monthlyChart").innerHTML=months.map((m,i)=>{
+      const monthRows=rows.filter(r=>r.date.startsWith(m)),done=monthRows.filter(r=>r.status==="ซ่อมเสร็จ").length;
+      return `<div class="chart-col"><div class="chart-bar primary" title="${monthRows.length} รายการ" style="height:${monthRows.length/max*82}%"></div><div class="chart-bar secondary" title="${done} งานซ่อมเสร็จ" style="height:${done/max*82}%"></div><span class="chart-label">${labels[i]}</span></div>`;
+    }).join("");
+    const statuses=[...new Set(rows.map(r=>r.status))];
+    document.getElementById("statusTotal").textContent=rows.length;
+    document.getElementById("statusList").innerHTML=statuses.map(status=>{
+      const count=rows.filter(r=>r.status===status).length,pct=rows.length?Math.round(count/rows.length*100):0;
+      return `<div class="status-row"><i class="status-dot" style="background:${statusColors[status]||"#aaa"}"></i><span>${escapeHtml(status)}</span><strong>${count}</strong><div class="progress"><i style="width:${pct}%;background:${statusColors[status]||"#aaa"}"></i></div></div>`;
+    }).join("")||`<div class="empty-state">ยังไม่มีข้อมูล</div>`;
+  }
+  function drawBars(target,key){
+    const counts={};rows.forEach(r=>counts[r[key]]=(counts[r[key]]||0)+1);
+    const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...entries.map(x=>x[1]));
+    document.getElementById(target).innerHTML=entries.map(([name,count])=>`<div class="bar-row"><span>${escapeHtml(name)}</span><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%"></div></div><strong class="bar-count">${count}</strong></div>`).join("")||`<div class="empty-state">ยังไม่มีข้อมูล</div>`;
+  }
+  function drawAnalytics(){
+    cardsFor(rows,"analyticsCards");drawBars("departmentBars","department");drawBars("equipmentBars","equipment");drawBars("priorityBars","priority");
+    const known=rows.filter(r=>totalCost(r)!==null),avgHours=averageKnown(rows,"hours"),avgSat=averageKnown(rows,"satisfaction");
+    document.getElementById("qualityMetrics").innerHTML=[
+      ["ค่าอะไหล่ที่ทราบ",money(sumKnown(known,"parts"))],
+      ["ค่าแรงที่ทราบ",money(sumKnown(known,"labor"))],
+      ["ค่าใช้จ่ายรวมที่ทราบ",money(sumKnown(known,"parts")+sumKnown(known,"labor"))],
+      ["เวลาเฉลี่ยของรายการที่มีข้อมูล",avgHours===null?"ไม่มีข้อมูล":avgHours.toFixed(1)+" ชั่วโมง"],
+      ["คะแนนเฉลี่ยจากผู้ประเมิน",avgSat===null?"ไม่มีข้อมูล":avgSat.toFixed(2)+" / 5"],
+      ["รายการที่ข้อมูลค่าใช้จ่ายไม่ครบ",nf.format(rows.length-known.length)+" รายการ"]
+    ].map(([label,value])=>`<div class="metric-item"><span>${label}</span><strong>${value}</strong></div>`).join("");
+  }
+  function populateFilters(){
+    [["departmentFilter","department"],["equipmentFilter","equipment"],["statusFilter","status"],["priorityFilter","priority"]].forEach(([id,key])=>{
+      const select=document.getElementById(id),current=select.value,values=[...new Set(rows.map(r=>r[key]))].sort();
+      select.innerHTML=`<option value="">${id==="departmentFilter"?"ทุกแผนก":id==="equipmentFilter"?"ทุกอุปกรณ์":id==="statusFilter"?"ทุกสถานะ":"ทุกระดับ"}</option>`+values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      select.value=values.includes(current)?current:"";
+    });
+  }
+  function filteredRows(){
+    const q=document.getElementById("q").value.trim().toLocaleLowerCase("th"),dept=document.getElementById("departmentFilter").value,equip=document.getElementById("equipmentFilter").value,status=document.getElementById("statusFilter").value,priority=document.getElementById("priorityFilter").value,from=document.getElementById("fromDate").value,to=document.getElementById("toDate").value;
+    return rows.filter(r=>(!q||[r.id,r.department,r.equipment,r.symptom,r.priority,r.status].some(v=>String(v).toLocaleLowerCase("th").includes(q)))&&(!dept||r.department===dept)&&(!equip||r.equipment===equip)&&(!status||r.status===status)&&(!priority||r.priority===priority)&&(!from||r.date>=from)&&(!to||r.date<=to)).sort((a,b)=>b.date.localeCompare(a.date));
+  }
+  function renderRequests(){
+    const filtered=filteredRows();cardsFor(filtered,"requestCards");
+    document.getElementById("resultCount").innerHTML=`แสดง <strong>${filtered.length}</strong> จาก ${rows.length} รายการ`;
+    document.getElementById("requestRows").innerHTML=filtered.length?filtered.map(r=>rowHtml(r,true)).join(""):`<tr><td colspan="10" class="empty-state">ไม่พบรายการที่ตรงกับตัวกรอง</td></tr>`;
+  }
+  function render(){
+    rows=[...originalRows,...customRows];populateFilters();cardsFor(rows,"overviewCards");cardsFor(rows,"requestCards");cardsFor(rows,"analyticsCards");
+    document.getElementById("recentRows").innerHTML=[...rows].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(r=>rowHtml(r)).join("");
+    drawChart();renderRequests();drawAnalytics();
+  }
+  function openDetail(id){
+    const row=rows.find(r=>r.id===id);if(!row)return;
+    document.getElementById("detailTitle").textContent=`รายละเอียด ${row.id}`;
+    const pairs=[["วันที่แจ้ง",formatDate(row.date)],["แผนก",row.department],["ประเภทอุปกรณ์",row.equipment],["อาการเสีย",row.symptom],["ความเร่งด่วน",row.priority],["สถานะงาน",row.status],["เวลาซ่อม",Number.isFinite(row.hours)?row.hours.toFixed(1)+" ชั่วโมง":"ไม่มีข้อมูล"],["ค่าอะไหล่",money(row.parts)],["ค่าแรง",money(row.labor)],["ค่าใช้จ่ายรวม",money(totalCost(row))],["ความพึงพอใจ",Number.isFinite(row.satisfaction)?row.satisfaction+" / 5":"ไม่มีข้อมูล"]];
+    document.getElementById("detailContent").innerHTML=pairs.map(([k,v])=>`<div class="detail-pair"><span>${k}</span><strong>${escapeHtml(v)}</strong></div>`).join("");
+    document.getElementById("detailBackdrop").classList.add("open");
+  }
+  function navigate(page){
+    document.querySelectorAll(".page").forEach(el=>el.classList.toggle("active",el.id==="page-"+page));
+    document.querySelectorAll(".nav-btn").forEach(el=>el.classList.toggle("active",el.dataset.page===page));
+    const button=document.querySelector(`.nav-btn[data-page="${page}"]`);
+    document.getElementById("crumb").textContent=button?button.querySelector(".nav-text").textContent:"ภาพรวม";
+    if(page==="requests")renderRequests();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function toast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2600);}
+  async function shareAppLink(){
+    if(location.protocol!=="http:"&&location.protocol!=="https:"){toast("ต้องเปิดแอปผ่านเว็บไซต์ก่อน จึงแชร์ลิงก์ให้ผู้อื่นได้");return;}
+    const url=location.href;
+    if(navigator.share){
+      try{await navigator.share({title:document.title,text:"เปิด FixFlow",url});toast("แชร์ลิงก์แล้ว");return;}
+      catch(error){if(error.name==="AbortError")return;console.warn("Unable to open the share dialog.",error);}
+    }
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(url);
+      else{
+        const field=document.createElement("textarea");field.value=url;field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";document.body.appendChild(field);field.select();
+        const copied=document.execCommand("copy");field.remove();if(!copied)throw new Error("Clipboard copy command was rejected.");
+      }
+      toast("คัดลอกลิงก์แล้ว นำไปวางในแอปอื่นได้");
+    }catch(error){console.error("Unable to copy the app link.",error);toast("คัดลอกลิงก์ไม่สำเร็จ กรุณาคัดลอกจากแถบที่อยู่");}
+  }
+  document.getElementById("shareApp").addEventListener("click",shareAppLink);
+  document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
+  document.querySelectorAll("[data-goto]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.goto)));
+  document.querySelectorAll(".add-open").forEach(btn=>btn.addEventListener("click",()=>document.getElementById("modalBackdrop").classList.add("open")));
+  document.getElementById("topAdd").addEventListener("click",()=>document.getElementById("modalBackdrop").classList.add("open"));
+  function closeForm(){document.getElementById("modalBackdrop").classList.remove("open");}
+  document.getElementById("closeModal").addEventListener("click",closeForm);document.getElementById("cancelModal").addEventListener("click",closeForm);
+  document.querySelectorAll(".detail-close").forEach(btn=>btn.addEventListener("click",()=>document.getElementById("detailBackdrop").classList.remove("open")));
+  [document.getElementById("modalBackdrop"),document.getElementById("detailBackdrop")].forEach(el=>el.addEventListener("click",e=>{if(e.target===el)el.classList.remove("open");}));
+  document.getElementById("requestForm").addEventListener("submit",event=>{
+    event.preventDefault();const form=new FormData(event.currentTarget),nextId=Math.max(0,...rows.map(r=>Number(r.id.slice(1))||0))+1,id="R"+String(nextId).padStart(3,"0");
+    customRows.push({id,date:form.get("date"),department:String(form.get("department")).trim(),equipment:String(form.get("equipment")).trim(),symptom:String(form.get("symptom")).trim(),priority:form.get("priority"),status:form.get("status")});
+    try{localStorage.setItem(storageKey,JSON.stringify(customRows));}catch(error){console.error("Unable to save repair record.",error);toast("บันทึกในเบราว์เซอร์ไม่สำเร็จ");return;}
+    event.currentTarget.reset();closeForm();render();navigate("requests");toast(`เพิ่มรายการ ${id} แล้ว`);
+  });
+  ["q","departmentFilter","equipmentFilter","statusFilter","priorityFilter","fromDate","toDate"].forEach(id=>document.getElementById(id).addEventListener("input",renderRequests));
+  document.getElementById("resetFilters").addEventListener("click",()=>{["q","departmentFilter","equipmentFilter","statusFilter","priorityFilter","fromDate","toDate"].forEach(id=>document.getElementById(id).value="");renderRequests();});
+  document.getElementById("requestRows").addEventListener("click",event=>{const tr=event.target.closest("tr[data-row]");if(tr)openDetail(tr.dataset.row);});
+  document.getElementById("recentRows").addEventListener("click",event=>{const tr=event.target.closest("tr[data-row]");if(tr)openDetail(tr.dataset.row);});
+  document.getElementById("exportCsv").addEventListener("click",()=>{
+    const header=["รหัสงาน","วันที่แจ้ง","แผนก","ประเภทอุปกรณ์","อาการเสีย","ความเร่งด่วน","สถานะงาน","เวลาซ่อม (ชั่วโมง)","ค่าอะไหล่ (บาท)","ค่าแรง (บาท)","ค่าใช้จ่ายรวม (บาท)","ความพึงพอใจ"];
+    const data=filteredRows().map(r=>[r.id,r.date,r.department,r.equipment,r.symptom,r.priority,r.status,r.hours??"",r.parts??"",r.labor??"",totalCost(r)??"",r.satisfaction??""]);
+    const csv="\uFEFF"+[header,...data].map(line=>line.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    const link=document.createElement("a");link.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));link.download="fixflow-repairs.csv";link.click();URL.revokeObjectURL(link.href);toast("ส่งออกไฟล์ CSV แล้ว");
+  });
+  render();
+</script>
+</body>
+</html>
